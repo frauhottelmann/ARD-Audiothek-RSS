@@ -1,70 +1,433 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <style>
-        /* thanks to https://perfectmotherfuckingwebsite.com */
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARD-Audiothek RSS Feed Generator</title>
+  <style>
+    :root {
+      /* Dracula Theme Colors */
+      --dracula-background: #282A36;
+      --dracula-foreground: #F8F8F2;
+      --dracula-selection: #44475A;
+      --dracula-comment: #6272A4;
+      --dracula-cyan: #8BE9FD;
+      --dracula-green: #50FA7B;
+      --dracula-red: #FF5555;
+      --dracula-purple: #BD93F9;
+      --dracula-pink: #FF79C6;
+      /* Extracted Palette Colors */
+      --dark-blue: #000e29;
+      --blue: #2d91ff;
+      --red: #ff6670;
+      --lightmuted: #d0b9cc;
+      --muted: #507ca5;
+      --vibrant: #0573eb;
+      --darkmuted: #45494e;
+      --lightvibrant: #64acf3;
+      --dominant: #e8eef3;
+    }
     body {
-        max-width: 650px;
-        margin: 40px auto;
-        padding: 0 10px;
-        font: 18px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-        color: #444
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--dracula-background); /* Dracula dark background */
+      color: var(--dracula-foreground); /* High-contrast text */
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+      font-size: 16px;
     }
-
-    @media (prefers-color-scheme: dark) {
-        body {
-            color: #c9d1d9;
-            background: #0d1117
-        }
-
-        a:link {
-            color: #58a6ff
-        }
-
-        a:visited {
-            color: #8e96f0
-        }
-
-        input {
-            background: #282f3b;
-            border: none;
-        }
-
-        input, select, textarea{
-            color: #c9d1d9;
-        }
-        
+    h1, h2 {
+      color: var(--dracula-purple); /* Purple for headers */
+      font-size: 18px;
+      margin-bottom: 10px;
     }
-    </style>
-    <title>Nutzung des Audiothek-RSS-Feed Generators</title>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <!-- weitere Kopfinformationen -->
-    <!-- Kommentare werden im Browser nicht angezeigt. -->
-  </head>
-  <body>
-    <h1>Instruktionen</h1>
+    .section {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: var(--dominant); /* Light gray for labels */
+    }
+    input[type="text"], input[type="number"], input[type="url"] {
+      padding: 8px;
+      width: 100%;
+      max-width: 300px;
+      margin-bottom: 10px;
+      background-color: var(--dark-blue); /* Dark blue for inputs */
+      color: #FFFFFF; /* White text for inputs */
+      border: 1px solid var(--dracula-selection); /* Selection for borders */
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    input:focus {
+      outline: none;
+      border-color: var(--dracula-cyan); /* Cyan for focus */
+    }
+    input[readonly] {
+      cursor: default;
+      opacity: 0.9;
+    }
+    button {
+      padding: 8px 16px;
+      background-color: var(--vibrant); /* Vibrant blue for buttons */
+      color: var(--dracula-foreground);
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button:hover {
+      background-color: var(--lightvibrant); /* Light vibrant for hover */
+    }
+    a {
+      color: var(--dracula-cyan); /* Cyan for links */
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+      color: var(--dracula-pink); /* Pink for link hover */
+    }
+    ul#searchResults {
+      list-style: none;
+      padding: 0;
+      margin-top: 10px;
+      max-width: 600px;
+      background-color: var(--muted); /* Muted for list background */
+      border-radius: 4px;
+      border: 1px solid var(--dracula-selection);
+    }
+    ul#searchResults li {
+      cursor: pointer;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--darkmuted); /* Dark muted for borders */
+    }
+    ul#searchResults li:hover {
+      background-color: var(--dracula-selection); /* Selection for hover */
+    }
+    ul#searchResults img {
+      width: 48px;
+      height: 48px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-right: 12px;
+    }
+    ul#searchResults strong {
+      color: var(--dracula-foreground);
+      font-size: 16px;
+    }
+    ul#searchResults span {
+      color: var(--dracula-comment); /* Comment for secondary text */
+      font-size: 13px;
+    }
+    ul#searchResults button.copy-btn {
+      margin-left: auto;
+      padding: 6px 12px;
+      font-size: 13px;
+      background-color: var(--dracula-purple);
+      color: var(--dracula-foreground);
+    }
+    ul#searchResults button.copy-btn:hover {
+      background-color: var(--dracula-pink); /* Pink for button hover */
+    }
+    .error {
+      color: var(--dracula-red); /* Red for errors */
+      display: none;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    .success {
+      color: var(--dracula-green); /* Green for success */
+      display: none;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    .input-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .url-display-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      max-width: 600px;
+    }
+  </style>
+</head>
+<body>
+  <h1>ARD-Audiothek RSS Feed Generator</h1>
+
+  <div class="section">
+    <h2>Instruktionen</h2>
     <p>Diese Seite kann einen RSS-Feed aus den Daten der ARD-Audiothek erzeugen. Dazu sind folgende Schritte nötig:</p>
-    <ul>
-        <li>Finde die ID des gewünschten Podcasts. Dies ist eine Zahlenfolge die am Ende der URL des Podcasts in der Audiothek hängt. Bspw 94702896 für den Podcast <a href="https://www.ardaudiothek.de/sendung/wild-wild-web-geschichten-aus-dem-internet/94702896/">Wild Wild Web</a> </li>
-        <li>Die folgende Datei öffnen und die ID dort hinter dem = einfügen: <a href="./ardaudiothek-rss.php?show=">ardaudiothek-rss</a>. </li>
-        <li>Beispielsweise ergibt sich so folgender Link: <a href="./ardaudiothek-rss.php?show=94702896">Beispiel Wild Wild Web</a>. </li>
-    </ul>
-    <p>Sollte man nur einen Feed mit den letzten X Folgen abonnieren wollen, kann man auch ein &quot;&amp;latest=X&quot; anhängen: <a href="./ardaudiothek-rss.php?show=94702896&latest=10">Beispiel Wild Wild Web, letzte 10 Folgen</a>. 
-    </br></br>
-<!--
-    <h2>Feed-ID Bestimmen</h2>
-    <p>Im folgenden Feld kann die URL aus der ARD Audiothek direkt eingefügt werden, um die ID zu extrahieren.</p>
+    <ol>
+      <li>Finde die ID des gewünschten Podcasts. Dies ist eine Zahlenfolge, die am Ende der URL des Podcasts in der Audiothek hängt. Bspw. <strong>94702896</strong> für den Podcast <em>Wild Wild Web</em>.</li>
+      <li>Die folgende Datei öffnen und die ID dort hinter dem = einfügen: <a id="baseUrl" href="javascript:void(0)">ardaudiothek-rss</a>.</li>
+      <li>Beispielsweise ergibt sich so folgender Link: <a id="exampleUrl" href="javascript:void(0)">Beispiel Wild Wild Web</a>.</li>
+      <li>Sollte man nur einen Feed mit den letzten X Folgen abonnieren wollen, kann man auch ein "&latest=X" anhängen: <a id="exampleLatestUrl" href="javascript:void(0)">Beispiel Wild Wild Web, letzte 10 Folgen</a>.</li>
+    </ol>
+  </div>
 
-    <input type="ArdLink" id="ArdLink" alt="URL des Podcasts in der ARD Audiothek" />
-    <input type="button" id="calcIDBtn" value="Feed-ID extrahieren" onclick="javascript:" />
--->
-
+  <div class="section">
     <h2>Feed Öffnen</h2>
-    <p>Im folgenden Feld die gewünschte Feed-ID eingeben, dann auf "Feed-Öffnen" klicken.</p>
-    <input type="FeedID" id="FeedID" alt="Feed-ID"/>
-    <input type="button" id="openFeed" value="Feed Öffnen" onClick="javascript: window.open('./index.php?show=' + document.getElementById('FeedID').value);" />
+    <p>Im folgenden Feld die gewünschte Feed-ID eingeben, dann auf "Feed Öffnen" klicken.</p>
+    <label for="FeedID">Podcast-ID:</label>
+    <input type="text" id="FeedID" placeholder="z.B. 94702896" aria-label="Podcast-ID eingeben">
+    <label for="latestEpisodes">Letzte X Folgen (optional):</label>
+    <input type="number" id="latestEpisodes" min="1" placeholder="z.B. 10" aria-label="Anzahl der letzten Folgen">
+    <div class="url-display-group">
+      <input type="url" id="feedUrlDisplay" readonly placeholder="Generierter RSS-Feed-URL" aria-label="Generierter RSS-Feed-URL">
+      <button id="copyUrlBtn">Copy URL</button>
+    </div>
+    <button id="generateBtn">Feed Öffnen</button>
+    <div id="errorMsg" class="error"></div>
+    <div id="successMsg" class="success"></div>
+  </div>
 
-<!-- noch einen Button einbauen, der den Link unten drunter anzeigt und potentiell in die Zwischenablage kopiert? -->
+  <div class="section">
+    <h2>Podcast suchen</h2>
+    <p>Hier kannst du nach einem Podcast suchen. Klicke auf einen Vorschlag, um die ID zu übernehmen.</p>
+    <label for="searchQuery">Suche:</label>
+    <div class="input-group">
+      <input type="text" id="searchQuery" placeholder="Podcast suchen..." aria-label="Podcast suchen">
+      <button id="searchBtn">Suchen</button>
+    </div>
+    <ul id="searchResults" aria-label="Suchergebnisse"></ul>
+  </div>
 
-  </body>
+  <script>
+    // DOM elements
+    const elements = {
+      feedIdInput: document.getElementById('FeedID'),
+      latestEpisodesInput: document.getElementById('latestEpisodes'),
+      generateBtn: document.getElementById('generateBtn'),
+      feedUrlDisplay: document.getElementById('feedUrlDisplay'),
+      copyUrlBtn: document.getElementById('copyUrlBtn'),
+      errorMsg: document.getElementById('errorMsg'),
+      successMsg: document.getElementById('successMsg'),
+      searchInput: document.getElementById('searchQuery'),
+      searchBtn: document.getElementById('searchBtn'),
+      resultsList: document.getElementById('searchResults'),
+      baseUrlLink: document.getElementById('baseUrl'),
+      exampleUrlLink: document.getElementById('exampleUrl'),
+      exampleLatestUrlLink: document.getElementById('exampleLatestUrl')
+    };
+
+    // Generate RSS feed URL with current host
+    const generateFeedUrl = (podcastId, latest) => {
+      const baseUrl = window.location.origin; // Use current host
+      let url = `${baseUrl}/ardaudiothek-rss.php?show=${encodeURIComponent(podcastId)}`;
+      if (latest && latest > 0) url += `&latest=${encodeURIComponent(latest)}`;
+      return url;
+    };
+
+    // Update instruction links dynamically
+    const updateInstructionLinks = () => {
+      const baseUrl = window.location.origin;
+      elements.baseUrlLink.href = `${baseUrl}/ardaudiothek-rss.php?show=`;
+      elements.baseUrlLink.textContent = `${baseUrl}/ardaudiothek-rss.php`;
+      elements.exampleUrlLink.href = `${baseUrl}/ardaudiothek-rss.php?show=94702896`;
+      elements.exampleUrlLink.textContent = `Beispiel Wild Wild Web`;
+      elements.exampleLatestUrlLink.href = `${baseUrl}/ardaudiothek-rss.php?show=94702896&latest=10`;
+      elements.exampleLatestUrlLink.textContent = `Beispiel Wild Wild Web, letzte 10 Folgen`;
+    };
+
+    // Show feedback message
+    const showFeedback = (element, message, type = 'success') => {
+      element.textContent = message;
+      element.style.display = 'block';
+      setTimeout(() => element.style.display = 'none', 3000);
+    };
+
+    // Copy to clipboard with fallback
+    const copyToClipboard = async (text, successMessage) => {
+      try {
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(text);
+          showFeedback(elements.successMsg, successMessage);
+        } else {
+          fallbackCopy(text, successMessage);
+        }
+      } catch (err) {
+        console.error('Clipboard API failed:', err);
+        fallbackCopy(text, successMessage);
+      }
+    };
+
+    // Fallback copy method
+    const fallbackCopy = (text, successMessage) => {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        showFeedback(elements.successMsg, successMessage);
+      } catch (err) {
+        console.error('Fallback copy failed:', err);
+        showFeedback(elements.errorMsg, 'Kopieren fehlgeschlagen. Bitte manuell kopieren.', 'error');
+      }
+      document.body.removeChild(textArea);
+    };
+
+    // Search podcasts via ARD-Audiothek API
+    const searchPodcasts = async () => {
+      const query = elements.searchInput.value.trim();
+      elements.resultsList.innerHTML = '<li>Suche läuft...</li>';
+
+      if (!query) {
+        elements.resultsList.innerHTML = '';
+        showFeedback(elements.errorMsg, 'Bitte geben Sie einen Suchbegriff ein.', 'error');
+        return;
+      }
+
+      try {
+        const response = await fetch(`https://api.ardaudiothek.de/search?query=${encodeURIComponent(query)}`, {
+          headers: { 'Accept': 'application/json' }
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('HTTP error response:', errorText);
+          throw new Error(`HTTP-Fehler! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const nodes = (data.data?.search?.programSets?.nodes) || [];
+
+        if (nodes.length === 0) {
+          elements.resultsList.innerHTML = '<li>Keine Podcasts gefunden.</li>';
+          return;
+        }
+
+        elements.resultsList.innerHTML = '';
+        nodes.forEach(podcast => {
+          if (!podcast.id || !podcast.title) return; // Skip invalid entries
+          const li = document.createElement('li');
+          li.style.cursor = 'pointer';
+          li.style.marginBottom = '12px';
+          li.style.display = 'flex';
+          li.style.alignItems = 'center';
+          li.style.padding = '6px 0';
+
+          // Thumbnail
+          if (podcast.image?.url1X1) {
+            const img = document.createElement('img');
+            img.src = podcast.image.url1X1.replace('{width}', '48');
+            img.alt = podcast.title;
+            img.style.width = '48px';
+            img.style.height = '48px';
+            img.style.objectFit = 'cover';
+            img.style.borderRadius = '8px';
+            img.style.marginRight = '12px';
+            li.appendChild(img);
+          }
+
+          // Text
+          const textDiv = document.createElement('div');
+          textDiv.innerHTML = `<strong>${podcast.title}</strong><br><span style="font-size:13px;">ID: ${podcast.id}</span>`;
+          if (podcast.synopsis) {
+            textDiv.title = podcast.synopsis;
+          }
+          li.appendChild(textDiv);
+
+          // Copy ID Button
+          const copyBtn = document.createElement('button');
+          copyBtn.innerText = 'Copy ID';
+          copyBtn.className = 'copy-btn';
+          copyBtn.onclick = (e) => {
+            e.stopPropagation(); // Prevent li click
+            copyToClipboard(podcast.id, 'Podcast-ID wurde kopiert!');
+            copyBtn.innerText = 'Copied!';
+            setTimeout(() => { copyBtn.innerText = 'Copy ID'; }, 2000);
+          };
+          li.appendChild(copyBtn);
+
+          // Click handler for selecting podcast
+          li.onclick = (e) => {
+            if (e.target !== copyBtn) {
+              elements.feedIdInput.value = podcast.id;
+              elements.resultsList.innerHTML = '';
+              // Update URL display
+              const latest = parseInt(elements.latestEpisodesInput.value, 10) || '';
+              const feedUrl = generateFeedUrl(podcast.id, latest);
+              elements.feedUrlDisplay.value = feedUrl;
+            }
+          };
+
+          elements.resultsList.appendChild(li);
+        });
+      } catch (error) {
+        console.error('Search API error:', error.message);
+        elements.resultsList.innerHTML = `<li>Fehler bei der Suche: ${error.message}</li>`;
+      }
+    };
+
+    // Handle feed generation
+    const handleFeedGeneration = () => {
+      const podcastId = elements.feedIdInput.value.trim();
+      const latest = parseInt(elements.latestEpisodesInput.value, 10) || '';
+
+      if (!podcastId || !/^\d+$/.test(podcastId)) {
+        showFeedback(elements.errorMsg, 'Bitte geben Sie eine gültige Podcast-ID ein.', 'error');
+        elements.feedUrlDisplay.value = '';
+        return;
+      }
+
+      const feedUrl = generateFeedUrl(podcastId, latest);
+      elements.feedUrlDisplay.value = feedUrl;
+      copyToClipboard(feedUrl, 'Feed-URL wurde kopiert!');
+    };
+
+    // Handle URL copy
+    const handleUrlCopy = () => {
+      const feedUrl = elements.feedUrlDisplay.value.trim();
+      if (!feedUrl) {
+        showFeedback(elements.errorMsg, 'Keine URL zum Kopieren vorhanden.', 'error');
+        return;
+      }
+      copyToClipboard(feedUrl, 'Feed-URL wurde kopiert!');
+    };
+
+    // Event listeners
+    elements.generateBtn.addEventListener('click', handleFeedGeneration);
+    elements.copyUrlBtn.addEventListener('click', handleUrlCopy);
+    elements.searchBtn.addEventListener('click', searchPodcasts);
+    elements.searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') searchPodcasts();
+    });
+    elements.feedIdInput.addEventListener('input', () => {
+      const podcastId = elements.feedIdInput.value.trim();
+      const latest = parseInt(elements.latestEpisodesInput.value, 10) || '';
+      if (podcastId && /^\d+$/.test(podcastId)) {
+        elements.feedUrlDisplay.value = generateFeedUrl(podcastId, latest);
+      } else {
+        elements.feedUrlDisplay.value = '';
+      }
+    });
+    elements.latestEpisodesInput.addEventListener('input', () => {
+      const podcastId = elements.feedIdInput.value.trim();
+      const latest = parseInt(elements.latestEpisodesInput.value, 10) || '';
+      if (podcastId && /^\d+$/.test(podcastId)) {
+        elements.feedUrlDisplay.value = generateFeedUrl(podcastId, latest);
+      } else {
+        elements.feedUrlDisplay.value = '';
+      }
+    });
+    document.addEventListener('click', (e) => {
+      if (!elements.resultsList.contains(e.target) && e.target !== elements.searchInput && e.target !== elements.searchBtn) {
+        elements.resultsList.innerHTML = '';
+      }
+    });
+
+    // Initialize instruction links
+    updateInstructionLinks();
+  </script>
+</body>
 </html>
