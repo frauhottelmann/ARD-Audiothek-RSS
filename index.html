@@ -2,44 +2,146 @@
 <html>
   <head>
     <style>
-        /* thanks to https://perfectmotherfuckingwebsite.com */
-    body {
+      :root {
+        --background: #282a36;
+        --foreground: #f8f8f2;
+        --accent-blue: #005566;
+        --accent-blue-hover: #0098A1;
+        --highlight: #8be9fd;
+        --secondary: #ff79c6;
+        --border: #44475a;
+        --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+      }
+
+      body {
         max-width: 650px;
         margin: 40px auto;
         padding: 0 10px;
-        font: 18px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-        color: #444
-    }
+        font: 18px/1.5 var(--font-stack);
+        color: var(--foreground);
+        background: var(--background);
+      }
 
-    @media (prefers-color-scheme: dark) {
+      h1, h2 {
+        color: var(--highlight);
+      }
+
+      a:link {
+        color: var(--highlight);
+        text-decoration: none;
+      }
+
+      a:hover {
+        color: var(--secondary);
+        text-decoration: underline;
+      }
+
+      a:visited {
+        color: #bd93f9;
+      }
+
+      input, button {
+        background: #44475a;
+        border: 1px solid var(--border);
+        color: var(--foreground);
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 16px;
+        transition: background 0.2s, border-color 0.2s;
+      }
+
+      input:focus, button:focus {
+        outline: none;
+        border-color: var(--accent-blue);
+      }
+
+      button {
+        background: var(--accent-blue);
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: var(--accent-blue-hover);
+      }
+
+      ul#searchResults li {
+        cursor: pointer;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        padding: 8px;
+        border-bottom: 1px solid var(--border);
+        transition: background 0.2s;
+      }
+
+      ul#searchResults li:hover {
+        background: #3a3f4a;
+        border-radius: 6px;
+      }
+
+      ul#searchResults img {
+        width: 48px;
+        height: 48px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-right: 12px;
+      }
+
+      ul#searchResults span {
+        color: #6272a4;
+        font-size: 13px;
+      }
+
+      .copy-btn {
+        margin-left: auto;
+        padding: 6px 10px;
+        font-size: 14px;
+      }
+
+      @media (prefers-color-scheme: light) {
+        :root {
+          --background: #f8f8f2;
+          --foreground: #2e3440;
+          --border: #d8dee9;
+        }
+
         body {
-            color: #c9d1d9;
-            background: #0d1117
+          color: var(--foreground);
+          background: var(--background);
         }
 
         a:link {
-            color: #58a6ff
+          color: var(--accent-blue);
         }
 
         a:visited {
-            color: #8e96f0
+          color: #004d40;
         }
 
-        input {
-            background: #282f3b;
-            border: none;
+        input, button {
+          background: #eceff4;
+          border-color: var(--border);
         }
 
-        input, select, textarea{
-            color: #c9d1d9;
+        button {
+          background: var(--accent-blue);
         }
-        
-    }
+
+        button:hover {
+          background: var(--accent-blue-hover);
+        }
+
+        ul#searchResults li:hover {
+          background: #e5e9f0;
+        }
+
+        ul#searchResults span {
+          color: #4c566a;
+        }
+      }
     </style>
     <title>Nutzung des Audiothek-RSS-Feed Generators</title>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <!-- weitere Kopfinformationen -->
-    <!-- Kommentare werden im Browser nicht angezeigt. -->
   </head>
   <body>
     <h1>Instruktionen</h1>
@@ -49,22 +151,87 @@
         <li>Die folgende Datei öffnen und die ID dort hinter dem = einfügen: <a href="./ardaudiothek-rss.php?show=">ardaudiothek-rss</a>. </li>
         <li>Beispielsweise ergibt sich so folgender Link: <a href="./ardaudiothek-rss.php?show=94702896">Beispiel Wild Wild Web</a>. </li>
     </ul>
-    <p>Sollte man nur einen Feed mit den letzten X Folgen abonnieren wollen, kann man auch ein &quot;&amp;latest=X&quot; anhängen: <a href="./ardaudiothek-rss.php?show=94702896&latest=10">Beispiel Wild Wild Web, letzte 10 Folgen</a>. 
+    <p>Sollte man nur einen Feed mit den letzten X Folgen abonnieren wollen, kann man auch ein "&latest=X" anhängen: <a href="./ardaudiothek-rss.php?show=94702896&latest=10">Beispiel Wild Wild Web, letzte 10 Folgen</a>. 
     </br></br>
-<!--
-    <h2>Feed-ID Bestimmen</h2>
-    <p>Im folgenden Feld kann die URL aus der ARD Audiothek direkt eingefügt werden, um die ID zu extrahieren.</p>
-
-    <input type="ArdLink" id="ArdLink" alt="URL des Podcasts in der ARD Audiothek" />
-    <input type="button" id="calcIDBtn" value="Feed-ID extrahieren" onclick="javascript:" />
--->
-
     <h2>Feed Öffnen</h2>
-    <p>Im folgenden Feld die gewünschte Feed-ID eingeben, dann auf "Feed-Öffnen" klicken.</p>
+    <p>Im folgenden Feld die gewünschte Feed-ID eingeben, dann auf "Feed Öffnen" klicken.</p>
     <input type="FeedID" id="FeedID" alt="Feed-ID"/>
-    <input type="button" id="openFeed" value="Feed Öffnen" onClick="javascript: window.open('./index.php?show=' + document.getElementById('FeedID').value);" />
-
-<!-- noch einen Button einbauen, der den Link unten drunter anzeigt und potentiell in die Zwischenablage kopiert? -->
-
+    <input type="button" id="openFeed" value="Feed Öffnen" onClick="javascript: window.open('./ardaudiothek-rss.php?show=' + document.getElementById('FeedID').value);" />
+    <h2>Podcast suchen</h2>
+    <p>Hier kannst du nach einem Podcast suchen. Klicke auf einen Vorschlag, um die ID zu übernehmen.</p>
+    <input type="text" id="searchQuery" placeholder="Suchbegriff..." />
+    <input type="button" id="searchBtn" value="Suchen" />
+    <ul id="searchResults" style="list-style-type:none; padding-left:0;"></ul>
+    <script>
+async function searchPodcasts() {
+    const query = document.getElementById('searchQuery').value.trim();
+    const resultsList = document.getElementById('searchResults');
+    resultsList.innerHTML = '';
+    if (!query) return;
+    resultsList.innerHTML = '<li>Suche läuft...</li>';
+    try {
+        const response = await fetch(`https://api.ardaudiothek.de/search?query=${encodeURIComponent(query)}`);
+        const data = await response.json();
+        const nodes = (data.data && data.data.search && data.data.search.programSets && data.data.search.programSets.nodes) || [];
+        if (nodes.length === 0) {
+            resultsList.innerHTML = '<li>Keine Podcasts gefunden.</li>';
+            return;
+        }
+        resultsList.innerHTML = '';
+        nodes.forEach(podcast => {
+            const li = document.createElement('li');
+            li.style.cursor = 'pointer';
+            li.style.marginBottom = '12px';
+            li.style.display = 'flex';
+            li.style.alignItems = 'center';
+            li.style.padding = '6px 0';
+            
+            // Thumbnail
+            if (podcast.image && podcast.image.url1X1) {
+                const img = document.createElement('img');
+                img.src = podcast.image.url1X1.replace('{width}', '48');
+                img.alt = podcast.title;
+                img.style.width = '48px';
+                img.style.height = '48px';
+                img.style.objectFit = 'cover';
+                img.style.borderRadius = '8px';
+                img.style.marginRight = '12px';
+                li.appendChild(img);
+            }
+            // Text
+            const textDiv = document.createElement('div');
+            textDiv.innerHTML = `<strong>${podcast.title}</strong><br><span style='font-size:13px;'>ID: ${podcast.id}</span>`;
+            if (podcast.synopsis) {
+                textDiv.title = podcast.synopsis;
+            }
+            li.appendChild(textDiv);
+            // Copy ID Button
+            const copyBtn = document.createElement('button');
+            copyBtn.innerText = 'Copy ID';
+            copyBtn.className = 'copy-btn';
+            copyBtn.onclick = () => {
+                navigator.clipboard.writeText(podcast.id).then(() => {
+                    copyBtn.innerText = 'Copied!';
+                    setTimeout(() => { copyBtn.innerText = 'Copy ID'; }, 2000);
+                });
+            };
+            li.appendChild(copyBtn);
+            li.onclick = (e) => {
+                if (e.target !== copyBtn) {
+                    document.getElementById('FeedID').value = podcast.id;
+                    resultsList.innerHTML = '';
+                }
+            };
+            resultsList.appendChild(li);
+        });
+    } catch (e) {
+        resultsList.innerHTML = '<li>Fehler bei der Suche.</li>';
+    }
+}
+document.getElementById('searchBtn').onclick = searchPodcasts;
+document.getElementById('searchQuery').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') searchPodcasts();
+});
+    </script>
   </body>
 </html>
